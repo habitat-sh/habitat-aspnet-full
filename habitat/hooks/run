@@ -1,0 +1,3 @@
+Import-Module WebAdministration
+Start-Website "{{pkg.name}}"
+Start-WebAppPool "{{pkg.name}}"

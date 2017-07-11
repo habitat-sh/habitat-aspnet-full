@@ -21,6 +21,6 @@ function Invoke-Build {
 }
 
 function Invoke-Install {
-  mkdir $pkg_prefix/www -Force
+  mkdir $pkg_prefix/www -Force | Out-Null
   Copy-Item $HAB_CACHE_SRC_PATH/$pkg_dirname/* "$pkg_prefix/www" -Recurse -Include @("bin", "content", "fonts", "scripts", "views", "global.asax", "favicon.ico", "web.config") 
 }
