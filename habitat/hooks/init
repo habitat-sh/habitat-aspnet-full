@@ -1,0 +1,52 @@
+Import-Module WebAdministration;
+
+Function Validate-PhysicalPath {
+     Param([string] $fpath)
+     
+     if(Test-path $fpath) {
+         Write-Host "The folder $fpath already exists" -ForegroundColor Yellow
+         return
+         }
+     else{
+         Write-Host "The folder $fpath doesn't exists" -ForegroundColor Yellow
+        }
+}
+
+Function Create-AppPool {
+        Param([string] $appPoolName)
+
+        if(Test-Path ("IIS:\AppPools\" + $appPoolName)) {
+            Write-Host "The App Pool $appPoolName already exists" -ForegroundColor Yellow
+            return
+        }
+
+        $appPool = New-WebAppPool -Name $appPoolName
+}
+
+Function Create-Website {
+        Param(
+          [string] $Path,
+          [string] $Name,
+          [string] $Pool
+        )
+
+  If(!(Test-Path "IIS:\Sites\$Name")){
+          New-Website -Name $Name -PhysicalPath $Path  -ApplicationPool $Pool
+          
+          }
+      else {
+          Write-Host "The IIS site $Name already exists" -ForegroundColor Yellow
+      }
+}
+
+$WebsiteRoot = "C:\inetpub\hab_www"
+$WebsiteName = "habitat_on_windows"
+$WebsitePool = "habitat_app_pool"
+
+Validate-PhysicalPath $WebsiteRoot
+Create-AppPool $WebsitePool
+# Dirty hack to disable the default website
+# TODO: Create function to validate the binding.
+Stop-Website "Default Web Site" -ErrorAction SilentlyContinue
+
+Create-Website -Path $WebsiteRoot -Name $WebsiteName -Pool $WebsitePool
