@@ -1,31 +1,16 @@
-Import-Module WebAdministration
-
-Function New-Site {
-        Param(
-          [string] $Path,
-          [string] $Name,
-          [string] $Pool
-        )
-
-  If(!(Test-Path "IIS:\Sites\$Name")){
-          New-Website -Name $Name -PhysicalPath $Path  -ApplicationPool $Pool
-          
-          }
-      else {
-          Write-Host "The IIS site $Name already exists" -ForegroundColor Yellow
-      }
-}
-
 Set-Location {{pkg.svc_path}}
 if(Test-Path var) { Remove-Item var -Recurse -Force }
 New-Item -Name var -ItemType Junction -target "{{pkg.path}}/www" | Out-Null
 
-if(!(Test-Path "IIS:\AppPools\{{pkg.name}}")) {
+."$env:SystemRoot\System32\inetsrv\appcmd.exe" list apppool "{{pkg.name}}" | Out-Null
+if($LASTEXITCODE -ne 0) {
     Write-Host "Creating App Pool {{pkg.name}}" -ForegroundColor Yellow
-    $appPool = New-WebAppPool -Name "{{pkg.name}}"
+    ."$env:SystemRoot\System32\inetsrv\appcmd.exe" add apppool /name:"{{pkg.name}}"
 }
 
-If(!(Test-Path "IIS:\Sites\{{pkg.name}}")){
+."$env:SystemRoot\System32\inetsrv\appcmd.exe" list site "{{pkg.name}}" | Out-Null
+if($LASTEXITCODE -ne 0) {
     Write-Host "Creating Web Site {{pkg.name}}" -ForegroundColor Yellow
-    New-Website -Name "{{pkg.name}}" -PhysicalPath ((Resolve-Path "{{pkg.svc_var_path}}").Path)  -ApplicationPool "{{pkg.name}}"
+    ."$env:SystemRoot\System32\inetsrv\appcmd.exe" add SITE /name:"{{pkg.name}}" /PhysicalPath:"$((Resolve-Path '{{pkg.svc_var_path}}').Path)" /bindings:http://*:{{cfg.port}}
+    ."$env:SystemRoot\System32\inetsrv\appcmd.exe" set site /site.name:"{{pkg.name}}" "/[path='/'].applicationPool:{{pkg.name}}"
 }

@@ -1,3 +1,14 @@
-Import-Module WebAdministration
-Start-Website "{{pkg.name}}"
-Start-WebAppPool "{{pkg.name}}"
+."$env:SystemRoot\System32\inetsrv\appcmd.exe" start apppool "{{pkg.name}}"
+."$env:SystemRoot\System32\inetsrv\appcmd.exe" start site "{{pkg.name}}"
+
+$running = $true
+Set-PSDebug -Off
+try {
+    while($running) {
+        Start-Sleep -Seconds 1
+    }
+}
+finally {
+    ."$env:SystemRoot\System32\inetsrv\appcmd.exe" stop apppool "{{pkg.name}}"
+    ."$env:SystemRoot\System32\inetsrv\appcmd.exe" stop site "{{pkg.name}}"
+}
