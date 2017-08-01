@@ -14,7 +14,7 @@ function invoke-verify { }
 function Invoke-Build {
   Copy-Item $PLAN_CONTEXT/../* $HAB_CACHE_SRC_PATH/$pkg_dirname -recurse -force -Exclude ".vagrant"
   nuget restore $HAB_CACHE_SRC_PATH/$pkg_dirname/packages.config -PackagesDirectory $HAB_CACHE_SRC_PATH/$pkg_dirname/packages
-  ."$env:SystemRoot\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" $HAB_CACHE_SRC_PATH/$pkg_dirname/habitat-aspnet-full.csproj /t:Build
+  ."$env:SystemRoot\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" $HAB_CACHE_SRC_PATH/$pkg_dirname/habitat-aspnet-full.csproj /t:Build /p:VisualStudioVersion=14.0
   if($LASTEXITCODE -ne 0) {
       Write-Error "dotnet build failed!"
   }
