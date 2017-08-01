@@ -1,16 +1,3 @@
 Set-Location {{pkg.svc_path}}
 if(Test-Path var) { Remove-Item var -Recurse -Force }
 New-Item -Name var -ItemType Junction -target "{{pkg.path}}/www" | Out-Null
-
-."$env:SystemRoot\System32\inetsrv\appcmd.exe" list apppool "{{pkg.name}}" | Out-Null
-if($LASTEXITCODE -ne 0) {
-    Write-Host "Creating App Pool {{pkg.name}}" -ForegroundColor Yellow
-    ."$env:SystemRoot\System32\inetsrv\appcmd.exe" add apppool /name:"{{pkg.name}}"
-}
-
-."$env:SystemRoot\System32\inetsrv\appcmd.exe" list site "{{pkg.name}}" | Out-Null
-if($LASTEXITCODE -ne 0) {
-    Write-Host "Creating Web Site {{pkg.name}}" -ForegroundColor Yellow
-    ."$env:SystemRoot\System32\inetsrv\appcmd.exe" add SITE /name:"{{pkg.name}}" /PhysicalPath:"$((Resolve-Path '{{pkg.svc_var_path}}').Path)" /bindings:http://*:{{cfg.port}}
-    ."$env:SystemRoot\System32\inetsrv\appcmd.exe" set site /site.name:"{{pkg.name}}" "/[path='/'].applicationPool:{{pkg.name}}"
-}

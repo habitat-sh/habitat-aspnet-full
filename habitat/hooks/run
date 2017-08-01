@@ -1,14 +1,61 @@
-."$env:SystemRoot\System32\inetsrv\appcmd.exe" start apppool "{{pkg.name}}"
-."$env:SystemRoot\System32\inetsrv\appcmd.exe" start site "{{pkg.name}}"
+# ."$env:SystemRoot\System32\inetsrv\appcmd.exe" list apppool "{{cfg.app_pool}}" | Out-Null
+# if($LASTEXITCODE -ne 0) {
+#     Write-Host "Creating App Pool {{pkg.app_pool}}" -ForegroundColor Yellow
+#     ."$env:SystemRoot\System32\inetsrv\appcmd.exe" add apppool /name:"{{cfg.app_pool}}"
+#     ."$env:SystemRoot\System32\inetsrv\appcmd.exe" set apppool /apppool.name:"{{cfg.app_pool}}" /managedRuntimeVersion:v4.0
+# }
 
-$running = $true
-Set-PSDebug -Off
+# ."$env:SystemRoot\System32\inetsrv\appcmd.exe" list site "{{cfg.site_name}}" | Out-Null
+# if($LASTEXITCODE -ne 0) {
+#     Write-Host "Creating Web Site {{cfg.site_name}}" -ForegroundColor Yellow
+#     ."$env:SystemRoot\System32\inetsrv\appcmd.exe" add SITE /name:"{{cfg.site_name}}" /PhysicalPath:"$((Resolve-Path '{{pkg.svc_path}}').Path)" /bindings:http://*:{{cfg.port}}
+#     Write-Host "Binding Web Site {{cfg.site_name}} to pool {{cfg.app_pool}}" -ForegroundColor Yellow
+#     ."$env:SystemRoot\System32\inetsrv\appcmd.exe" set site /site.name:"{{cfg.site_name}}" "/[path='/'].applicationPool:{{cfg.app_pool}}"
+# }
+
+# ."$env:SystemRoot\System32\inetsrv\appcmd.exe" list app /site.name:"{{cfg.site_name}}" | Findstr "{{cfg.app_name}}" | Out-Null
+# if($LASTEXITCODE -ne 0) {
+#     Write-Host "Creating Application {{cfg.app_name}} at path /{{pkg.name}} with physical path '$((Resolve-Path `"{{pkg.svc_var_path}}`").Path)'"
+#     ."$env:SystemRoot\System32\inetsrv\appcmd.exe" add app /site.name:"{{cfg.site_name}}" /path:"/{{cfg.app_name}}" /PhysicalPath:"$((Resolve-Path '{{pkg.svc_var_path}}').Path)" /applicationPool:"{{cfg.app_pool}}"
+# }
+
+# ."$env:SystemRoot\System32\inetsrv\appcmd.exe" start apppool "{{cfg.app_pool}}"
+# ."$env:SystemRoot\System32\inetsrv\appcmd.exe" start site "{{cfg.site_name}}"
+
+$ProgressPreference="SilentlyContinue"
+Write-Host "Ensuring xWebAdministration DSC resources are installed..."
+Install-Module xWebAdministration -Force | Out-Null
+
+Write-Host "Compiling DSC mof..."
+. (Join-Path {{pkg.svc_config_path}} website.ps1)
+$mof = NewWebsite -OutputPath "{{pkg.svc_data_path}}"
+
+# Need to move xWebAdministration because LCM is not honoring PS Core's PSModulePath
+$mod = (Get-Module xWebAdministration -ListAvailable).ModuleBase
+$machine_mod = "C:\Program Files\windowsPowerShell\Modules\xWebAdministration"
+if(Test-Path $machine_mod) { Remove-Item $machine_mod -Recurse -Force }
+Move-Item $mod $machine_mod -Force
+
+$configurationData = Get-Content $mof.FullName -Encoding Byte -ReadCount 0
+$totalSize = [System.BitConverter]::GetBytes($configurationData.Length + 4)
+$configurationData = $totalSize + $configurationData
+
+Write-Host "Applying DSC configuration..."
+Invoke-CimMethod -ComputerName localhost -Namespace "root/Microsoft/Windows/DesiredStateConfiguration" -ClassName "MSFT_DSCLocalConfigurationManager" -MethodName "SendConfigurationApply" -Arguments @{ConfigurationData = $configurationData; Force = $true}
+
 try {
+    Write-Host "{{pkg.name}} is running"
+    $running = $true
     while($running) {
         Start-Sleep -Seconds 1
+        $resp = Invoke-WebRequest "http://localhost:{{cfg.port}}/{{cfg.app_name}}" -Method Head
+        if($resp.StatusCode -ne 200) { $running = $false }
     }
 }
+catch {
+    Write-Host "{{pkg.name}} HEAD check failed"
+}
 finally {
-    ."$env:SystemRoot\System32\inetsrv\appcmd.exe" stop apppool "{{pkg.name}}"
-    ."$env:SystemRoot\System32\inetsrv\appcmd.exe" stop site "{{pkg.name}}"
+    # Add any cleanup here which will run after supervisor stops the service
+    Write-Host "{{pkg.name}} has stopped"
 }
