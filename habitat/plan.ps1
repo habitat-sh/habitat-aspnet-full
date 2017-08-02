@@ -6,7 +6,7 @@ $pkg_upstream_url="https://github.com/mwrock/habitat-aspnet-full"
 $pkg_maintainer="The Habitat Maintainers <humans@habitat.sh>"
 $pkg_license=@('MIT')
 $pkg_description="A sample ASP.NET Full FX IIS app"
-$pkg_build_deps=@("core/nuget", "core/visual-cpp-build-tools-2015")
+$pkg_build_deps=@("core/nuget")
 
 function invoke-download { }
 function invoke-verify { }
