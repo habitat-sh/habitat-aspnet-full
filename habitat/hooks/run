@@ -57,5 +57,7 @@ catch {
 }
 finally {
     # Add any cleanup here which will run after supervisor stops the service
+    ."$env:SystemRoot\System32\inetsrv\appcmd.exe" stop apppool "{{cfg.app_pool}}"
+    ."$env:SystemRoot\System32\inetsrv\appcmd.exe" stop site "{{cfg.site_name}}"
     Write-Host "{{pkg.name}} has stopped"
 }
