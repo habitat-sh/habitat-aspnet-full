@@ -34,7 +34,7 @@ Currently its up to the plan author to determine how they want to manage this. T
 * Let your Config Management or Provisioner set these up for you (ala Chef).
 * Let your run hook determine if these primitives are configured and use PowerShell to talk to IIS and set them up.
 
-This plan takes the second approach. It also includes two ways to do this for the sake of reference. One way uses `AppCmd.exe` and the other uses DSC. Which should you use? Use DSC if your server is installed with [WMF 4](https://www.microsoft.com/en-us/download/details.aspx?id=40855) or higher. This is far superior over `AppCmd.exe`. Note that you will find the DSC Configurations located in `habitat/config`. You will likely only use `AppCmd.exe` if you are on 2008 R2 and cannot upgrade to WMF 4. The run hook in this plan includes example `AppCmd.exe` calls that are commented out in favor of DSC.
+This plan takes the second approach. It also includes two ways to do this for the sake of reference. One way uses `AppCmd.exe` and the other uses DSC. Which should you use? Use DSC if your server is installed with [WMF 5](https://www.microsoft.com/en-us/download/details.aspx?id=50395) or higher. This is far superior over `AppCmd.exe`. Note that you will find the DSC Configurations located in `habitat/config`. You will likely only use `AppCmd.exe` if you are on 2008 R2 and cannot upgrade to WMF 5. The run hook in this plan includes example `AppCmd.exe` calls that are commented out in favor of DSC.
 
 ## What's next here?
 
