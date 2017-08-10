@@ -1,27 +1,3 @@
-# ."$env:SystemRoot\System32\inetsrv\appcmd.exe" list apppool "{{cfg.app_pool}}" | Out-Null
-# if($LASTEXITCODE -ne 0) {
-#     Write-Host "Creating App Pool {{pkg.app_pool}}" -ForegroundColor Yellow
-#     ."$env:SystemRoot\System32\inetsrv\appcmd.exe" add apppool /name:"{{cfg.app_pool}}"
-#     ."$env:SystemRoot\System32\inetsrv\appcmd.exe" set apppool /apppool.name:"{{cfg.app_pool}}" /managedRuntimeVersion:v4.0
-# }
-
-# ."$env:SystemRoot\System32\inetsrv\appcmd.exe" list site "{{cfg.site_name}}" | Out-Null
-# if($LASTEXITCODE -ne 0) {
-#     Write-Host "Creating Web Site {{cfg.site_name}}" -ForegroundColor Yellow
-#     ."$env:SystemRoot\System32\inetsrv\appcmd.exe" add SITE /name:"{{cfg.site_name}}" /PhysicalPath:"$((Resolve-Path '{{pkg.svc_path}}').Path)" /bindings:http://*:{{cfg.port}}
-#     Write-Host "Binding Web Site {{cfg.site_name}} to pool {{cfg.app_pool}}" -ForegroundColor Yellow
-#     ."$env:SystemRoot\System32\inetsrv\appcmd.exe" set site /site.name:"{{cfg.site_name}}" "/[path='/'].applicationPool:{{cfg.app_pool}}"
-# }
-
-# ."$env:SystemRoot\System32\inetsrv\appcmd.exe" list app /site.name:"{{cfg.site_name}}" | Findstr "{{cfg.app_name}}" | Out-Null
-# if($LASTEXITCODE -ne 0) {
-#     Write-Host "Creating Application {{cfg.app_name}} at path /{{pkg.name}} with physical path '$((Resolve-Path `"{{pkg.svc_var_path}}`").Path)'"
-#     ."$env:SystemRoot\System32\inetsrv\appcmd.exe" add app /site.name:"{{cfg.site_name}}" /path:"/{{cfg.app_name}}" /PhysicalPath:"$((Resolve-Path '{{pkg.svc_var_path}}').Path)" /applicationPool:"{{cfg.app_pool}}"
-# }
-
-# ."$env:SystemRoot\System32\inetsrv\appcmd.exe" start apppool "{{cfg.app_pool}}"
-# ."$env:SystemRoot\System32\inetsrv\appcmd.exe" start site "{{cfg.site_name}}"
-
 $ProgressPreference="SilentlyContinue"
 Write-Host "Ensuring xWebAdministration DSC resources are installed..."
 Install-Module xWebAdministration -Force | Out-Null

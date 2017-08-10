@@ -1,4 +1,4 @@
-bin
-obj
+hab-sln/bin
+hab-sln/obj
 packages
-habitat/results
+hab-sln/habitat/results

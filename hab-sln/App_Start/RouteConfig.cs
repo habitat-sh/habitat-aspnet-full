@@ -5,7 +5,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace habitat_aspnet_full
+namespace hab_sln
 {
     public class RouteConfig
     {

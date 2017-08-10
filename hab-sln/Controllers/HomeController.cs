@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
-namespace habitat_aspnet_full.Controllers
+namespace hab_sln.Controllers
 {
     public class HomeController : Controller
     {

@@ -1,7 +1,7 @@
 ﻿using System.Web;
 using System.Web.Mvc;
 
-namespace habitat_aspnet_full
+namespace hab_sln
 {
     public class FilterConfig
     {
