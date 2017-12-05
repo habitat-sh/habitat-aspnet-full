@@ -2,6 +2,11 @@ Configuration NewWebsite
 {
     Import-DscResource -Module xWebAdministration
     Node 'localhost' {
+        WindowsFeature ASP 
+        { 
+            Ensure = "Present"
+            Name = "Web-Asp-Net45"
+        }
 
         xWebAppPool {{cfg.app_pool}}
         {
