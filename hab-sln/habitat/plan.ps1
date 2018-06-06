@@ -1,7 +1,6 @@
 $pkg_name="hab-sln"
 $pkg_origin="mwrock"
 $pkg_version="0.1.0"
-$pkg_source="nosuchfile.tar.gz"
 $pkg_maintainer="Matt Wrock"
 $pkg_license=@('MIT')
 $pkg_description="A sample ASP.NET Full FX IIS app"
@@ -9,9 +8,6 @@ $pkg_build_deps=@(
   "core/nuget",
   "core/dotnet-47-dev-pack"
 )
-
-function invoke-download { }
-function invoke-verify { }
 
 function Invoke-Build {
   Copy-Item $PLAN_CONTEXT/../../* $HAB_CACHE_SRC_PATH/$pkg_dirname -recurse -force

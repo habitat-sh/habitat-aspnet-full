@@ -22,6 +22,8 @@ We just are not going to try and package these and we won't feel bad about ourse
 
 We will let our Provisioner or Configuration Management tool handle those dependencies. Our plans and hooks will assume that the correct .Net runtime version is installed (Windows 2012 and forward comes with .Net 4) and that the necessary IIS featrures are enabled.
 
+UPDATE: The DSC configuration run by the run hook (see below) now ensures IIS and ASP.NET are enabled.
+
 ### Our run hook will sleep
 Typically having a Hook sleep is an anti-pattern but in the case of an IIS app it makes sense. Our run hooks will simply make sure that our IIS application pool and web sites are present and running. Then it will sleep until the application becomes unresponsive or the service is stopped.
 
