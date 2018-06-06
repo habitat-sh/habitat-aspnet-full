@@ -1,23 +1,21 @@
 $ProgressPreference="SilentlyContinue"
-Write-Host "Ensuring xWebAdministration DSC resources are installed..."
-Install-Module xWebAdministration -Force | Out-Null
 
-Write-Host "Compiling DSC mof..."
-. (Join-Path {{pkg.svc_config_path}} website.ps1)
-$mof = NewWebsite -OutputPath "{{pkg.svc_data_path}}"
+Invoke-Command -ComputerName localhost -EnableNetworkAccess {
+    $ProgressPreference="SilentlyContinue"
+    Write-Host "Checking for nuget package provider..."
+    if(!(Get-PackageProvider -Name nuget -ErrorAction SilentlyContinue -ListAvailable)) {
+        Write-Host "Installing Nuget provider..."
+        Install-PackageProvider -Name NuGet -Force | Out-Null
+    }
+    Write-Host "Checking for xWebAdministration PS module..."
+    if(!(Get-Module xWebAdministration -ListAvailable)) {
+        Write-Host "Installing xWebAdministration PS Module..."
+        Install-Module xWebAdministration -Force | Out-Null
+    }
+}
 
-# Need to move xWebAdministration because LCM is not honoring PS Core's PSModulePath
-$mod = (Get-Module xWebAdministration -ListAvailable).ModuleBase
-$machine_mod = "C:\Program Files\windowsPowerShell\Modules\xWebAdministration"
-if(Test-Path $machine_mod) { Remove-Item $machine_mod -Recurse -Force }
-Move-Item $mod $machine_mod -Force
-
-$configurationData = Get-Content $mof.FullName -Encoding Byte -ReadCount 0
-$totalSize = [System.BitConverter]::GetBytes($configurationData.Length + 4)
-$configurationData = $totalSize + $configurationData
-
-Write-Host "Applying DSC configuration..."
-Invoke-CimMethod -ComputerName localhost -Namespace "root/Microsoft/Windows/DesiredStateConfiguration" -ClassName "MSFT_DSCLocalConfigurationManager" -MethodName "SendConfigurationApply" -Arguments @{ConfigurationData = $configurationData; Force = $true}
+Import-Module "{{pkgPathFor "core/dsc-core"}}/Modules/DscCore"
+Start-DscCore (Join-Path {{pkg.svc_config_path}} website.ps1) NewWebsite
 
 try {
     Write-Host "{{pkg.name}} is running"
