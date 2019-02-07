@@ -18,17 +18,19 @@ The IIS application process model allow applications to be run inside of "pools"
 In order to overcome the above challenges, we need to take a different approach to how we package .NET Full Framework IIS applications:
 
 ### No .Net-Full or IIS package
-We just are not going to try and package these and we won't feel bad about ourselves.
+~~We just are not going to try and package these and we won't feel bad about ourselves.~~
 
-We will let our Provisioner or Configuration Management tool handle those dependencies. Our plans and hooks will assume that the correct .Net runtime version is installed (Windows 2012 and forward comes with .Net 4) and that the necessary IIS featrures are enabled.
+~~We will let our Provisioner or Configuration Management tool handle those dependencies. Our plans and hooks will assume that the correct .Net runtime version is installed (Windows 2012 and forward comes with .Net 4) and that the necessary IIS featrures are enabled.~~
 
-UPDATE: The DSC configuration run by the run hook (see below) now ensures IIS and ASP.NET are enabled.
+**UPDATE:** As of Habitat 0.74.0, there is now an `install` hook that allows packages to execute a script upon installation. This means we can now provide packages for .Net full framework runtimes and IIS features. This plan has added these dependencies. In order for the `install` hook to be recognized, the `HAB_FEAT_INSTALL_HOOK` environment variable must be set to any value.
 
 ### Our run hook will sleep
 Typically having a Hook sleep is an anti-pattern but in the case of an IIS app it makes sense. Our run hooks will simply make sure that our IIS application pool and web sites are present and running. Then it will sleep until the application becomes unresponsive or the service is stopped.
 
 ## Building the plan
-The Habitat plan uses `Nuget.exe` and `MSBuild.exe` to find dependencies and build the application binaries. We do have a `nuget` plan that packages the `nuget` commandline. However, this plan currently assumes the Visual Studio 2015 build tools are installed. We will be packaging this tool chain soon and thereby remove the dependency of a fully installed Visual Studio.
+The Habitat plan uses `Nuget.exe` and `MSBuild.exe` to find dependencies and build the application binaries. We do have a `nuget` plan that packages the `nuget` commandline. ~~However, this plan currently assumes the Visual Studio 2015 build tools are installed. We will be packaging this tool chain soon and thereby remove the dependency of a fully installed Visual Studio.~~ 
+
+**Update:** We now provide `msbuild` tooling plans used by this plan.
 
 ## Setting up IIS App Pools, Apps and Sites
 Currently its up to the plan author to determine how they want to manage this. There are a couple options:
@@ -41,10 +43,9 @@ This plan takes the second approach. It also includes two ways to do this for th
 ## What's next here?
 
 ### Package Tool Chain
-While we won't attempt to package the .Net runtime, I believe the SDK binaries and MSBuild targets can be packaged and will bring some build time delight to building full framework apps in habitat.
-
-### Scaffolding
-Ideally one should simply need to put a very small plan in the same directory as their Visual Studio `.sln` or `.csproj`, add in some DSC Configuration and then get a plan that "just builds."
+~~While we won't attempt to package the .Net runtime, I believe the SDK binaries and MSBuild targets can be packaged and will bring some build time delight to building full framework apps in habitat.~~
+**Update:** Done!
 
 ### Handle .Net Framework and IIS Feature installation
-Currently we blissfully pretend these exist. But with scaffolding, it may be nice if our hooks could detect if the framework is missing or IIS features not enabled and set the system right the first time the service is started.
+~~Currently we blissfully pretend these exist. It may be nice if our hooks could detect if the framework is missing or IIS features not enabled and set the system right the first time the service is started.~~
+**Update:** Done!
