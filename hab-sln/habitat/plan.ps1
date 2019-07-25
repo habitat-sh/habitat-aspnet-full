@@ -8,13 +8,16 @@ $pkg_deps=@("core/dotnet-472-runtime", "core/iis-webserverrole", "core/iis-aspne
 $pkg_build_deps=@(
   "core/nuget",
   "core/dotnet-472-dev-pack",
-  "core/visual-build-tools-2017"
+  "core/visual-build-tools-2017/15/20190718145120",
+  "core/dotnet-core-sdk"
 )
 
 function Invoke-Build {
   Copy-Item $PLAN_CONTEXT/../../* $HAB_CACHE_SRC_PATH/$pkg_dirname -recurse -force
-  nuget restore $HAB_CACHE_SRC_PATH/$pkg_dirname/$pkg_name/packages.config -PackagesDirectory $HAB_CACHE_SRC_PATH/$pkg_dirname/packages -Source "https://www.nuget.org/api/v2"
+  dotnet restore --packages $HAB_CACHE_SRC_PATH/$pkg_dirname/packages
+  # nuget restore $HAB_CACHE_SRC_PATH/$pkg_dirname/$pkg_name/packages.config -PackagesDirectory $HAB_CACHE_SRC_PATH/$pkg_dirname/packages -Source "https://www.nuget.org/api/v2"
   nuget install MSBuild.Microsoft.VisualStudio.Web.targets -Version 14.0.0.3 -OutputDirectory $HAB_CACHE_SRC_PATH/$pkg_dirname/
+  $env:MSBuildSDKsPath=(Resolve-Path "$(Get-HabPackagePath dotnet-core-sdk)\bin\sdk\*\sdks").Path
   $env:TargetFrameworkRootPath="$(Get-HabPackagePath dotnet-472-dev-pack)\Program Files\Reference Assemblies\Microsoft\Framework"
   $env:VSToolsPath = "$HAB_CACHE_SRC_PATH/$pkg_dirname/MSBuild.Microsoft.VisualStudio.Web.targets.14.0.0.3/tools/VSToolsPath"
   MSBuild $HAB_CACHE_SRC_PATH/$pkg_dirname/$pkg_name/${pkg_name}.csproj /t:Build
@@ -24,5 +27,5 @@ function Invoke-Build {
 }
 
 function Invoke-Install {
-  MSBuild $HAB_CACHE_SRC_PATH/$pkg_dirname/$pkg_name/${pkg_name}.csproj /t:WebPublish /p:WebPublishMethod=FileSystem /p:publishUrl=$pkg_prefix/www
+  # MSBuild $HAB_CACHE_SRC_PATH/$pkg_dirname/$pkg_name/${pkg_name}.csproj /t:WebPublish /p:WebPublishMethod=FileSystem /p:publishUrl=$pkg_prefix/www
 }
