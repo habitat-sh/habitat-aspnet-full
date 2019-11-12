@@ -1,0 +1,22 @@
+version: '3'
+services:
+  nginx:
+    image: mwrock/nginx-proxy
+    ports:
+      - "80:80"
+    environment:
+      - HAB_LICENSE=accept-no-persist
+    command: --bind backend:hab-sln.default
+  dotnet:
+    image: mwrock/hab-sln
+    environment:
+      - HAB_LICENSE=accept-no-persist
+    links:
+      - nginx
+    depends_on:
+      - nginx
+    command: --peer nginx
+networks:
+  default:
+    external:
+      name: nat

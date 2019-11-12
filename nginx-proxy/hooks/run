@@ -1,0 +1,6 @@
+Set-Location {{pkg.svc_path}}
+mkdir temp -ErrorAction SilentlyContinue
+if(Test-Path conf) { Remove-Item conf -Recurse -Force }
+Copy-Item config conf -Recurse
+
+nginx
