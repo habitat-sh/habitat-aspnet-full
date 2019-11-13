@@ -16,6 +16,34 @@ Loading the built service into the Habitat Supervisor will configure IIS to run 
 The application's `run` hook will use DSC to configure the IIS application pool, site and app.
 
 ## Load balancing multiple application instances
-This repository includes a `nginx-proxy` plan that can be built and used to load balance several application instances running on separate Supervisors. One way to do this is to export both the `hab-sln` web application and the `nginx-proxy` plans to a Docker image and run miltiple `hab-sln` containers and then bind a `nginx-proxy` container to those web app containers:
+This repository includes an `nginx-proxy` plan that can be built and used to load balance several application instances running on separate Supervisors. One way to do this is to export both the `hab-sln` web application and the `nginx-proxy` plans to a Docker image and run miltiple `hab-sln` containers and then bind a `nginx-proxy` container to those web app containers. There is a `docker-compose.yml` file in the root of the repo that can launch such a container environment. You will need to replace its `mwrock` origin reference to the origin you used to build the plans. Assuming you want to run two web application nodes, run the following docker-compose command:
 
 ```
+docker-compose up --scale dotnet=2
+``
+
+After you see the web application has come up on both web containers (you will know when you see the output `hab-sln is running`), run `Invoke-Webrequest http://localhost/hab_app`.  This should return output beginning with the following text:
+
+```
+StatusCode        : 200
+StatusDescription : OK
+Content           : <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="utf-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Home Page - My ASP.NET Application</title>
+                        <l...
+RawContent        : HTTP/1.1 200 OK
+                    Connection: keep-alive
+                    X-AspNetMvc-Version: 5.2
+                    X-Upstream: 172.24.34.97:8099
+                    Content-Length: 3191
+                    Cache-Control: private
+                    Content-Type: text/html; charset=utf-8
+                    Date: Wed, 13 No...
+```
+
+Note that the `X-Upstream` header will have the origin IP of the `hab-sln` container that served the request. If you rerun the `Invoke-WebRequest` command, it should round robin through all containers in the `hab-sln` service group.
+
+Also note that the above `localhost` URL only works on Windows Server 2019 and newer builds of Windows 10. If you are on server 2016 or an older Windows 10 build, you must use the IP of the nginx container.
