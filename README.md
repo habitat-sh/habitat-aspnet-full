@@ -20,7 +20,7 @@ This repository includes an `nginx-proxy` plan that can be built and used to loa
 
 ```
 docker-compose up --scale dotnet=2
-``
+```
 
 After you see the web application has come up on both web containers (you will know when you see the output `hab-sln is running`), run `Invoke-Webrequest http://localhost/hab_app`.  This should return output beginning with the following text:
 
