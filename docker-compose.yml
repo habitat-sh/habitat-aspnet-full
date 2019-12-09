@@ -4,13 +4,19 @@ services:
     image: mwrock/nginx-proxy
     ports:
       - "80:80"
+      - "9631:9631"
+      - "9632"
     environment:
       - HAB_LICENSE=accept-no-persist
+      - HAB_LISTEN_CTL=0.0.0.0:9632
     command: --bind backend:hab-sln.default
   dotnet:
     image: mwrock/hab-sln
+    ports:  
+      - "9632"
     environment:
       - HAB_LICENSE=accept-no-persist
+      - HAB_LISTEN_CTL=0.0.0.0:9632
     links:
       - nginx
     depends_on:
