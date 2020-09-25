@@ -18,7 +18,7 @@ Import-Module "{{pkgPathFor "core/dsc-core"}}/Modules/DscCore"
 Start-DscCore (Join-Path {{pkg.svc_config_path}} website.ps1) NewWebsite
 
 try {
-    Write-Host "{{pkg.name}} is running"
+    Write-Host "http://{{sys.ip}}:{{cfg.port}}/{{cfg.app_name}} is running"
     $running = $true
     while($running) {
         Start-Sleep -Seconds 1
