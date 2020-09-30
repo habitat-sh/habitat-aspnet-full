@@ -1,24 +1,9 @@
 $ProgressPreference="SilentlyContinue"
 
-Invoke-Command -ComputerName localhost -EnableNetworkAccess {
-    $ProgressPreference="SilentlyContinue"
-    Write-Host "Checking for nuget package provider..."
-    if(!(Get-PackageProvider -Name nuget -ErrorAction SilentlyContinue -ListAvailable)) {
-        Write-Host "Installing Nuget provider..."
-        Install-PackageProvider -Name NuGet -Force | Out-Null
-    }
-    Write-Host "Checking for xWebAdministration PS module..."
-    if(!(Get-Module xWebAdministration -ListAvailable)) {
-        Write-Host "Installing xWebAdministration PS Module..."
-        Install-Module xWebAdministration -Force | Out-Null
-    }
-}
-
-Import-Module "{{pkgPathFor "core/dsc-core"}}/Modules/DscCore"
 Start-DscCore (Join-Path {{pkg.svc_config_path}} website.ps1) NewWebsite
 
 try {
-    Write-Host "{{pkg.name}} is running"
+    Write-Host "http://{{sys.ip}}:{{cfg.port}}/{{cfg.app_name}} is running"
     $running = $true
     while($running) {
         Start-Sleep -Seconds 1
