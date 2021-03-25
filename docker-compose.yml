@@ -21,7 +21,7 @@ services:
       - nginx
     depends_on:
       - nginx
-    command: --peer nginx
+    command: --peer nginx --strategy at-once --channel unstable
 networks:
   default:
     external:

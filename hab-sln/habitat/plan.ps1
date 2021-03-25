@@ -30,4 +30,5 @@ function Invoke-Build {
 
 function Invoke-Install {
   MSBuild $HAB_CACHE_SRC_PATH/$pkg_dirname/$pkg_name/${pkg_name}.csproj /t:WebPublish /p:WebPublishMethod=FileSystem /p:publishUrl=$pkg_prefix/www
+  (Get-Content "$pkg_prefix/www/views/home/Index.cshtml").replace("ASP.NET and IIS on Habitat!", "ASP.NET and IIS on Habitat! - $pkg_version/$pkg_release") | Set-Content "$pkg_prefix/www/views/home/Index.cshtml"
 }
